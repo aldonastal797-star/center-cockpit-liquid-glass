@@ -31,7 +31,9 @@ npm run build
 
 ## 给 MagicPath
 
-优先使用 [单文件兼容版](./magicpath/CENTER.compat.tsx)，按 [MAGICPATH_HANDOFF.md](./MAGICPATH_HANDOFF.md) 完整替换现有主组件。它包含原版液态玻璃、地球、粒子与样式，仅依赖宿主 React；不需要 ZIP、多文件复制、额外安装包或素材上传。图片与字体从本公开仓库联网加载。MagicPath 线上尚未确认同步成功。
+先确认有直接编辑源码的能力：使用 MagicPath 外部代码接口，或确实可编辑并同步项目文件的编辑器。仅发送生成指令的内置 edit_component 不能保证直接替换，不适合让它逐字复现打包源码。
+
+有直接写入能力时，使用 [单文件兼容版](./magicpath/CENTER.compat.tsx)，按 [MAGICPATH_HANDOFF.md](./MAGICPATH_HANDOFF.md) 完整替换现有主组件，并先确认实际入口的导入关系。它包含原版液态玻璃、地球、粒子与样式，仅依赖宿主 React；不需要额外安装包或素材上传。外部 API 按其会话要求上传源码归档；图片与字体从本公开仓库联网加载。MagicPath 线上尚未确认同步成功。
 
 维护源码位于 src/components/generated/，共享配置、偏好保存和镜头逻辑已独立，类型只通过 type import 引用。兼容版为构建产物，请修改源码后运行：
 

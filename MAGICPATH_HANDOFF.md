@@ -2,7 +2,17 @@
 
 修改现有「CENTER 驾驶舱 · 稳定轨道」，保留中文内容、冷蓝银河、巨大地球、航天器和交互。不要删除现有组件或凭描述重写。
 
-## 推荐：直接接入已经编译的单文件版
+## 先确认工具能直接写文件
+
+本文是源码接入说明，适用于 MagicPath 外部代码接口或确实能编辑项目源文件的编辑器。若内置聊天的 edit_component 只向下游 AI 发送生成指令，它不能执行本文要求的直接替换；不要让它逐字复现打包文件，也不要反复重试消耗额度。
+
+外部接口的可用流程是：get_component_code_context 读取当前文件与约束，start_component_code_session 创建编辑会话，按返回的上传命令上传源码归档，再用 submit_component_code 提交；待构建完成后检查其返回的真实错误与预览。直接提交源码不依赖内置聊天重新生成代码，但仍受外部 API 额度、托管构建和项目访问权限限制。
+
+「在 IDE 中打开」及保存后自动同步的入口和行为尚未验证。只有在实际看到对应入口、文件和同步状态后，才将其作为可用接入方式。
+
+不要默认覆盖 src/App.tsx。此前读取的 CENTER 托管脚手架中，App.tsx 从 ./components/generated/CENTER 导入 CENTER；因此对应目标是 src/components/generated/CENTER.tsx。远端可能已变化，应以本次读取到的真实导入关系和约束为准，保留入口的主题与宿主逻辑。
+
+## 有直接文件写入能力时：接入单文件版
 
 完整文件：
 https://raw.githubusercontent.com/aldonastal797-star/center-cockpit-liquid-glass/main/magicpath/CENTER.compat.tsx
