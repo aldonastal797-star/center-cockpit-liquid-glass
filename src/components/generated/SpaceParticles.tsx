@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ParticleConfig } from './SceneSettings';
+import type { ParticleConfig } from './sceneConfig';
 const vertex = `#version 300 es
 in vec2 position;
 void main(){gl_Position=vec4(position,0.,1.);}`;

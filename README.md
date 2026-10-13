@@ -31,9 +31,17 @@ npm run build
 
 ## 给 MagicPath
 
-先读 [MAGICPATH_HANDOFF.md](./MAGICPATH_HANDOFF.md)，再按其中列出的文件修改现有 CENTER。这里是最新验证版本；MagicPath 线上尚未同步这一版。
+优先使用 [单文件兼容版](./magicpath/CENTER.compat.tsx)，按 [MAGICPATH_HANDOFF.md](./MAGICPATH_HANDOFF.md) 完整替换现有主组件。它包含原版液态玻璃、地球、粒子与样式，仅依赖宿主 React；不需要 ZIP、多文件复制、额外安装包或素材上传。图片与字体从本公开仓库联网加载。MagicPath 线上尚未确认同步成功。
 
-关键实现位于 `src/components/generated/`。图片位于 `public/assets/`。将素材接入 MagicPath 时，放入目标项目的 `assets/`，并保留 `assets/...` 引用以便其构建器处理。
+维护源码位于 src/components/generated/，共享配置、偏好保存和镜头逻辑已独立，类型只通过 type import 引用。兼容版为构建产物，请修改源码后运行：
+
+```bash
+npm run magicpath:bundle
+npm test
+npm run build:magicpath
+```
+
+运行开发服务器后，打开 /magicpath-preview.html 可以直接测试同一份兼容文件。生成 TSX 中的 @ts-nocheck 仅用于已经擦除类型的编译产物；原始源码仍通过严格 TypeScript 检查。
 
 ## 验证
 

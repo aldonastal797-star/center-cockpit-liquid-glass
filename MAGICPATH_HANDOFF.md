@@ -1,33 +1,47 @@
 # 给 MagicPath 的实施说明
 
-请修改现有 CENTER 驾驶舱，以此仓库为最新源码依据。保留冷蓝深空配色、银河、巨大地球、航天器造型、中文内容、暂停和原有交互。
+修改现有「CENTER 驾驶舱 · 稳定轨道」，保留中文内容、冷蓝银河、巨大地球、航天器和交互。不要删除现有组件或凭描述重写。
 
-## 先读这些文件
+## 推荐：直接接入已经编译的单文件版
 
-1. `src/components/generated/CENTER.tsx`：驾驶舱、下滑布局、导航、分层镜头与设置保存。
-2. `src/components/generated/CENTER.css`：桌面 / 手机布局及原组件尺寸适配。
-3. `src/components/generated/GlassSurface.tsx`：指定 Liquid Glass React 组件的适配层。
-4. `src/components/generated/liquid-glass/index.tsx`、`shader-utils.ts`、`utils.ts`：rdev 原组件实现。
-5. `src/components/generated/Earth.tsx`：地球自转、光照与贴图。
-6. `src/components/generated/SpaceParticles.tsx`：多层光场粒子和兼容模式。
-7. `src/components/generated/SceneSettings.tsx`：实时场景配置。
+完整文件：
+https://raw.githubusercontent.com/aldonastal797-star/center-cockpit-liquid-glass/main/magicpath/CENTER.compat.tsx
 
-## 必须保留的实现
+读取该文件的全部源码，完整替换目标组件的主 TSX 文件。保留导出名称 CENTER（文件也提供 default 导出），按现有入口的导出约定接入。旧的 Earth、SpaceParticles、SceneSettings 和玻璃辅助文件可以留在项目里，但新主文件不再引用它们；不要与旧主文件合并、追加，或只复制其中一部分。
 
-- 实际使用 rdev/liquid-glass-react 原组件的折射、色散与边缘高光，不改回仅有 blur 和细边框的 CSS 面板。
-- 玻璃的背景发生变化时，透光与反射随之变化；文字与操作区保持稳定。
-- 首屏以太空场景为主。学习、AI 和底部导航位于下滑后的内容区，不将所有面板塞入同一视图。
-- 点击靠近时，航天器明显放大，地球变化较小，星空基本稳定；不得整幅背景一起等比例变换。
-- 地球固定位置慢速自转，明暗由光源决定，加强半明半暗的体积层次，不用南北半球纬度遮罩代替光照。
-- 粒子采用多层柔光、不同方向漂移及不同频率闪烁，保留场景预设、滑杆、暂停和本地设置保存。
-- 保留手机、键盘、Esc 返回、减少动态效果和加载失败回退。
+此文件已包含地球、粒子、设置、相机、rdev 原版液态玻璃源码和 CSS。仅从宿主引用 React 与 react/jsx-runtime，不需要安装 liquid-glass-react、图标包或 Tailwind，也不需要复制其他组件。素材与中文字体使用本公开仓库的完整 HTTPS 地址，需联网加载；不要改回不匹配的 assets/ 路径或旧 CDN。
 
-## 接入注意
+文件第一行的 @ts-nocheck 只用于由严格校验源码生成的 JavaScript 接入产物，避免宿主把已经擦除类型的生成代码当作手写 TypeScript 再报告隐式 any。原始多文件源码仍启用 strict、noUnused 与 verbatimModuleSyntax 检查；这不是诊断或修复未知构建错误的证据。
 
-此仓库可以直接用 Vite 运行；如果目标是已有 MagicPath 组件，不要用本仓库的 package.json、入口和构建配置覆盖它的托管脚手架。将 generated 下的组件接入原入口即可。
+## 必须保留的行为
 
-如目标环境不能安装 npm 包，请使用仓库中已经保留 MIT 许可证的 rdev 原源码。
+- 实际使用 rdev/liquid-glass-react 1.1.1 的折射、色散和边缘高光；文字、原生按钮与操作区保持清晰。
+- 首屏以太空场景为主，学习、AI 与底部导航在下滑后出现。
+- 靠近时航天器明显放大，地球变化较小，星空基本稳定；不得让 space-scene 整体等比例变换。
+- 地球位置固定、慢速自转，明暗按统一光源方向计算，而非按南北半球固定压暗。
+- 保留多层柔光粒子、不同方向漂移、分层闪烁、滑杆、预设、本地设置保存。
+- 保留暂停、手机布局、键盘、Esc 返回与减少动态效果。
 
-将 `public/assets/` 下的图片复制为目标项目的 `assets/`，源码中的 `assets/...` 引用需要一并迁移。所有现有图片都已随仓库提供，不必重新生成星空或航天器。
+## 如果构建仍失败
 
-在完成后检查类型、构建、贴图加载、滚动、镜头、参数保存、桌面和手机，提供首屏、下滑内容和手机截图。
+先返回本次真实构建日志中的第一条 error，包含文件名、行列号、错误代码和完整内容。不要用「组件太复杂」「文件损坏」「CDN 不同」代替错误日志，也不要反复发送同类生成指令。
+
+若错误仍指向旧辅助文件，说明宿主也会检查未引用的旧文件。此时定位并修复那条错误；单文件主入口不能自动修复宿主保留的其他错误文件。若主文件名或导出不符合入口约定，只调整入口映射，不重写材质与场景。若出现网络/CORS/资源加载错误，属于运行阶段，应单独处理，而非当作 TypeScript 编译错误。
+
+## 多文件源码（后续维护用）
+
+- src/components/generated/CENTER.tsx：主界面与交互编排。
+- sceneConfig.ts：共享类型、默认值、预设、输入校验。
+- useScenePreferences.ts：设置读取与保存。
+- useOrbitCamera.ts：靠近、镜头适配、Esc 返回。
+- SceneSettings.tsx、Earth.tsx、SpaceParticles.tsx：设置与场景渲染。
+- GlassSurface.tsx、liquid-glass/：指定原组件与适配层。
+- CENTER.css：完整样式。public/assets/：场景、玻璃贴图、字体。
+
+已有 MagicPath 项目不要用本仓库的 package.json、入口、tsconfig 或 Vite 配置覆盖托管脚手架。上面的单文件方案只需替换目标主组件。
+
+## 本地验证与再生成
+
+运行 npm ci、npm run magicpath:bundle、npm test、npm run build、npm run build:magicpath。启动 npm run dev 后，/ 是多文件版，/magicpath-preview.html 是使用同一兼容文件的预览。
+
+本地通过不等于 MagicPath 托管构建已通过。交付时分别报告两边状态；检查真实贴图、滚动、镜头、暂停与设置保存，不要只报告页面能打开。

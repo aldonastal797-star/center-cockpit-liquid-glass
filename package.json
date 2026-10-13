@@ -5,17 +5,21 @@
     "dev": "vite --host 127.0.0.1",
     "check": "tsc --noEmit",
     "build": "vite build",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "vite preview --host 127.0.0.1",
+    "magicpath:bundle": "npm run check && node scripts/build-magicpath.mjs",
+    "test": "node scripts/test-scene-config.mjs && node scripts/check-magicpath.mjs",
+    "build:magicpath": "vite build --config vite.magicpath.config.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "vite": "^6.4.1",
     "@types/react": "^18.3.0",
-    "@types/react-dom": "^18.3.0"
+    "@types/react-dom": "^18.3.0",
+    "esbuild": "^0.25.12",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.1"
   },
   "name": "center-cockpit-liquid-glass",
   "version": "0.1.0"

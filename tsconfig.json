@@ -14,9 +14,11 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "verbatimModuleSyntax": true
   },
   "include": [
-    "src"
+    "src",
+    "magicpath"
   ]
 }

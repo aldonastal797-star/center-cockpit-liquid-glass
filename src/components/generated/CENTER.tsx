@@ -1,8 +1,10 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import './CENTER.css';
 import { Earth } from './Earth';
 import { SpaceParticles } from './SpaceParticles';
-import { SceneSettings, defaultScene, SceneConfig } from './SceneSettings';
+import { SceneSettings } from './SceneSettings';
+import { useScenePreferences } from './useScenePreferences';
+import { useOrbitCamera } from './useOrbitCamera';
 import { GlassSurface, GlassContext } from './GlassSurface';
 const sections = ['驾驶舱', '今日', '学习', '项目', 'AI', '更多'];
 const initialTasks = [{
@@ -26,55 +28,8 @@ export const CENTER = () => {
   const [tasks, setTasks] = useState(initialTasks);
   const [section, setSection] = useState('驾驶舱');
   const [paused, setPaused] = useState(false);
-  const [sceneConfig, setSceneConfig] = useState<SceneConfig>(defaultScene);
+  const [sceneConfig, setSceneConfig] = useScenePreferences();
   const [particlesFallback, setParticlesFallback] = useState(false);
-  const [preferencesReady, setPreferencesReady] = useState(false);
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('center-scene-v1') || 'null');
-      if (saved && typeof saved === 'object') {
-        const p = {
-          ...defaultScene.particles
-        };
-        const limits: Record<string, [number, number]> = {
-          brightness: [.3, 2],
-          layers: [8, 30],
-          speed: [0, .6],
-          glow: [.1, .85],
-          scale: [.4, 1.2],
-          size: [.005, .08],
-          direction: [0, 360]
-        };
-        for (const key of Object.keys(p) as Array<keyof typeof p>) {
-          const value = saved.particles?.[key];
-          if (typeof p[key] === 'boolean' && typeof value === 'boolean') Object.assign(p, {
-            [key]: value
-          });else if (limits[key] && typeof value === 'number' && Number.isFinite(value)) {
-            const [min, max] = limits[key];
-            Object.assign(p, {
-              [key]: Math.min(max, Math.max(min, value))
-            });
-          }
-        }
-        p.layers = Math.round(p.layers);
-        setSceneConfig({
-          particles: p,
-          glassColor: typeof saved.glassColor === 'number' && Number.isFinite(saved.glassColor) ? Math.max(0, Math.min(1, saved.glassColor)) : .8,
-          glass: typeof saved.glass === 'number' && Number.isFinite(saved.glass) ? Math.max(.4, Math.min(1, saved.glass)) : 1
-        });
-      }
-    } catch {/* Storage may be unavailable in private previews. */}
-    setPreferencesReady(true);
-  }, []);
-  useEffect(() => {
-    if (!preferencesReady) return;
-    const id = setTimeout(() => {
-      try {
-        localStorage.setItem('center-scene-v1', JSON.stringify(sceneConfig));
-      } catch {}
-    }, 250);
-    return () => clearTimeout(id);
-  }, [sceneConfig, preferencesReady]);
   useEffect(() => {
     if (section !== '更多') return;
     if (innerWidth <= 760) requestAnimationFrame(() => document.querySelector('.scene-settings')?.scrollIntoView({
@@ -90,79 +45,7 @@ export const CENTER = () => {
     window.addEventListener('keydown', close);
     return () => window.removeEventListener('keydown', close);
   }, [section]);
-  const [cameraFocused, setCameraFocused] = useState(false);
-  const [camera, setCamera] = useState({
-    x: 0,
-    y: 0,
-    scale: 1
-  });
-  const rootRef = useRef<HTMLElement>(null);
-  const sceneRef = useRef<HTMLDivElement>(null);
-  const stationRef = useRef<HTMLDivElement>(null);
-  const stationButtonRef = useRef<HTMLButtonElement>(null);
-  const returnToWide = () => {
-    setCameraFocused(false);
-    requestAnimationFrame(() => stationButtonRef.current?.focus({
-      preventScroll: true
-    }));
-  };
-  const toggleCamera = () => {
-    if (cameraFocused) {
-      returnToWide();
-      return;
-    }
-    rootRef.current?.scrollIntoView({
-      behavior: 'auto',
-      block: 'start'
-    });
-    setCameraFocused(true);
-  };
-  useLayoutEffect(() => {
-    if (!cameraFocused) {
-      setCamera({
-        x: 0,
-        y: 0,
-        scale: 1
-      });
-      return;
-    }
-    const scene = sceneRef.current,
-      station = stationRef.current,
-      root = rootRef.current;
-    if (!scene || !station || !root) return;
-    const fitCamera = () => {
-      const image = station.querySelector<HTMLImageElement>('.station-layer');
-      const ratio = image && image.naturalHeight ? image.naturalWidth / image.naturalHeight : 2;
-      const shipWidth = Math.min(station.offsetWidth, station.offsetHeight * ratio);
-      const scale = Math.max(1.35, Math.min(3, root.clientWidth * (root.clientWidth <= 760 ? .86 : .67) / Math.max(shipWidth, 1)));
-      const transform = stationButtonRef.current ? getComputedStyle(stationButtonRef.current).transform : 'none';
-      const offset = transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).m41;
-      const cx = station.offsetLeft + station.offsetWidth / 2 + offset;
-      const cy = station.offsetTop + station.offsetHeight / 2;
-      setCamera({
-        x: root.clientWidth * .5 - cx * scale,
-        y: scene.clientHeight * .46 - cy * scale,
-        scale
-      });
-    };
-    fitCamera();
-    const observer = new ResizeObserver(fitCamera);
-    observer.observe(scene);
-    observer.observe(root);
-    const followTimer = setInterval(fitCamera, 100);
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        returnToWide();
-      }
-    };
-    window.addEventListener('keydown', onEscape);
-    return () => {
-      observer.disconnect();
-      clearInterval(followTimer);
-      window.removeEventListener('keydown', onEscape);
-    };
-  }, [cameraFocused]);
+  const { cameraFocused, camera, rootRef, sceneRef, stationRef, stationButtonRef, returnToWide, toggleCamera } = useOrbitCamera();
   const [studying, setStudying] = useState(false);
   const [ai, setAi] = useState('今晚的地球很美。先完成英语阅读，再休息一下？');
   const [clock, setClock] = useState('');
@@ -207,7 +90,7 @@ export const CENTER = () => {
     '--glass-blur': 50 * sceneConfig.glass + 'px',
     '--glass-tint': (.12 + .10 * sceneConfig.glass).toFixed(2),
     '--glass-color': sceneConfig.glassColor ?? .8
-  } as React.CSSProperties} data-camera={cameraFocused ? 'station' : 'wide'} className={`center-app ${paused ? 'motion-paused' : ''} ${cameraFocused ? 'camera-focused' : ''}`}>
+  } as CSSProperties} data-camera={cameraFocused ? 'station' : 'wide'} className={`center-app ${paused ? 'motion-paused' : ''} ${cameraFocused ? 'camera-focused' : ''}`}>
       <div ref={sceneRef} className="space-scene" style={{
       transform: 'none'
     }}><img className="star-backdrop" style={{transform: `translate3d(${camera.x*.015}px,${camera.y*.015}px,0) scale(${1+(camera.scale-1)*.015})`}} src="assets/space/starfield.png" alt="" />

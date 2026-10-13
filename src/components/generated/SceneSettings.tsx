@@ -1,56 +1,6 @@
 import { GlassSurface } from './GlassSurface';
-export type ParticleConfig = {
-  brightness: number;
-  layers: number;
-  speed: number;
-  glow: number;
-  scale: number;
-  size: number;
-  direction: number;
-  randomize: boolean;
-  blink: boolean;
-  warp: boolean;
-};
-export type SceneConfig = {
-  particles: ParticleConfig;
-  glass: number;
-  glassColor?: number;
-};
-export const originalParticles: ParticleConfig = {
-  brightness: 1.2,
-  layers: 30,
-  speed: .15,
-  glow: .25,
-  scale: .7,
-  size: .01,
-  direction: 200,
-  randomize: true,
-  blink: true,
-  warp: false
-};
-export const defaultScene: SceneConfig = {
-  particles: {
-    ...originalParticles
-  },
-  glass: 1,
-  glassColor: .8
-};
-const presets = {
-  '原版柔光': originalParticles,
-  '深空微光': {
-    ...originalParticles,
-    brightness: .85,
-    layers: 26,
-    speed: .1,
-    glow: .22
-  },
-  '清晰星光': {
-    ...originalParticles,
-    brightness: 1.45,
-    glow: .48,
-    size: .015
-  }
-};
+import { defaultScene, originalParticles, particlePresets } from './sceneConfig';
+import type { ParticleConfig, SceneConfig } from './sceneConfig';
 export function SceneSettings({
   config,
   onChange,
@@ -84,7 +34,7 @@ export function SceneSettings({
     <div className="panel-heading"><h2 id="scene-settings-title">场景调节</h2><button type="button" onClick={onClose} aria-label="关闭场景调节">关闭</button></div>
     <p className="settings-description">找到你喜欢的星光与玻璃质感。调整即时生效，自动保存在此浏览器。</p>
     {fallback && <p className="settings-fallback" role="status">当前设备使用柔光粒子兼容模式。</p>}
-    <fieldset className="scene-presets"><legend>星光风格</legend><div>{Object.entries(presets).map(([name, preset]) => <button type="button" key={name} aria-pressed={Object.keys(preset).every(k => p[k as keyof ParticleConfig] === preset[k as keyof ParticleConfig])} onClick={() => onChange({
+    <fieldset className="scene-presets"><legend>星光风格</legend><div>{Object.entries(particlePresets).map(([name, preset]) => <button type="button" key={name} aria-pressed={Object.keys(preset).every(k => p[k as keyof ParticleConfig] === preset[k as keyof ParticleConfig])} onClick={() => onChange({
           ...config,
           particles: {
             ...preset
