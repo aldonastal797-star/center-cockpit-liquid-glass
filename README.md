@@ -1,6 +1,6 @@
 # CENTER 驾驶舱 · Liquid Glass
 
-可运行的 React / TypeScript 太空驾驶舱，也是供 MagicPath 读取的最新源码参考。
+独立运行的 React / TypeScript 太空驾驶舱。本地源码与 GitHub 仓库是主版本；日常修改、预览和构建不需要 MagicPath 或 MCP。MagicPath 接入文件作为可选交付产物保留。
 
 ## 本地运行
 
@@ -11,7 +11,13 @@ npm ci
 npm run dev
 ```
 
-打开终端显示的本地地址。验证与生产构建：
+在 Cursor 中直接打开已有的 `D:\CENTER STAR\github-export\center-cockpit-liquid-glass` 文件夹即可，不必重新克隆。已安装依赖时，只需在项目终端运行 `npm run dev`。
+
+预览地址固定为 http://127.0.0.1:4175/ 。保持开发终端运行，修改并保存 `src/components/generated/` 下的源码后，Vite 会自动更新本地预览。若端口被占用，会明确报错，不会悄悄换到另一个端口。结束预览时，在该终端按 Ctrl+C。
+
+日常修改使用 `src/` 源码；`magicpath/CENTER.compat.tsx` 是生成产物，不要直接编辑。只有准备再次接入 MagicPath 时才需要重新生成它。
+
+验证与生产构建：
 
 ```bash
 npm run check
