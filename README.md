@@ -45,8 +45,10 @@ npm run build:magicpath
 
 ## 验证
 
-严格 TypeScript 检查和 Vite 生产构建通过。检查了桌面与手机布局、无横向溢出、粒子暂停、分层靠近、Esc 返回、预设与玻璃参数、刷新后保存设置。浏览器控制台未报告错误或警告。未进行真实设备性能基准；Safari / Firefox 的折射支持受原组件限制。
+重构后的源码通过严格 TypeScript（含 verbatimModuleSyntax）检查、多文件与单文件预览的 Vite 生产构建。配置测试覆盖损坏存储、越界值、非有限数字与对象独立性；单文件检查确认没有本地组件依赖，仅导入 React。检查了桌面与手机布局、无横向溢出、粒子暂停、分层靠近、Esc 返回、预设与玻璃参数、刷新后保存设置。单文件版也验证了 GitHub 素材与字体加载、地球及云层就绪、玻璃滤镜、首屏之外的学习栏目、手机无溢出、暂停冻结、不同层镜头变换、Esc 焦点返回、刷新后设置保存。浏览器控制台未报告错误或警告。未进行真实设备性能基准；Safari / Firefox 的折射支持受原组件限制。
 
 ![下滑内容示例](./docs/desktop-lower.png)
 
 第三方组件来源和许可证见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。
+
+![单文件兼容版首屏验证](./docs/compat-desktop.png)
